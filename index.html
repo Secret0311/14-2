@@ -496,7 +496,7 @@ for(let i=0;i<18;i++){
 <!-- MUSIC -->
 <audio id="music" autoplay muted loop src="music.mp3"></audio>
 
-<button class="music-btn" id="musicBtn">🎵</button>
+
 
 <script>
 let isRotating = false;
@@ -541,6 +541,9 @@ document.querySelectorAll(".lock button").forEach(b=>{
         lockBg.style.transform = "translate(-50%,-50%) scale(0.85)";
         setTimeout(()=>lockBg.remove(),800);
     }
+    const music = document.getElementById("music");
+    music.muted = false;
+    music.play();
 }
 
     }
@@ -640,22 +643,20 @@ const btn=document.getElementById("musicBtn");*/
     if(music.paused){music.play();btn.textContent="🔊"}
     else{music.pause();btn.textContent="🎵"}
 };*/
-window.addEventListener("load", () => {
-    const music = document.getElementById("music");
-    const btn = document.getElementById("musicBtn");
+/*const music = document.getElementById("music");
+const btn = document.getElementById("musicBtn");
 
-    // phát khi load (đang muted nên không bị chặn)
-    music.play().then(()=>{
-        // bật tiếng sau 500ms
-        setTimeout(()=>{
-            music.muted = false;
-            btn.textContent = "🔊";
-        }, 500);
-    }).catch(()=>{
-        console.log("Autoplay bị chặn");
-    });
-    
-});
+btn.onclick = () => {
+    if (music.paused) {
+        music.muted = false;
+        music.play();
+        btn.textContent = "🔊";
+    } else {
+        music.pause();
+        btn.textContent = "🎵";
+    }
+};
+
 
 /* ===== RANDOM IMAGE POSITION ===== */
 
