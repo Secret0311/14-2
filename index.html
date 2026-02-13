@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Thiệp Tình Yêu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{
+    margin:0;
+    min-height:100vh;
+    background:#fdeef2;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+.screen{display:none}
+.screen.active{display:block}
+
+/* HEART FLOAT */
+.heart{
+    position:absolute;width:18px;height:18px;
+    background:pink;transform:rotate(45deg);
+    animation:float 10s linear infinite;opacity:.6;
+}
+.heart::before,.heart::after{
+    content:"";position:absolute;width:18px;height:18px;
+    background:pink;border-radius:50%;
+}
+.heart::before{top:-9px}
+.heart::after{left:-9px}
+@keyframes float{from{bottom:-20px}to{bottom:110%}}
+
+/* LOCK */
+
+.lock{display:flex;gap:12px;justify-content:center}
+
+.col{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.col button{
+    border:none;
+    background:#ff7aa2;
+    color:#fff;
+    width:36px;
+    height:28px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.col input{
+    width:40px;
+    height:40px;
+    text-align:center;
+    font-size:22px;
+    border:none;
+    background:#f3f3f3;
+    margin:6px 0;
+    border-radius:10px;
+}
+
+/* CARD */
+.card{
+    width: min(900px, 95vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    background:#fff8f8;border-radius:26px;
+    padding:24px;border:3px dashed #ffb6c1;
+    box-shadow:0 20px 40px rgba(0,0,0,.15);
+}
+.card-inner{display:flex;gap:30px}
+.card-left{flex:1}
+.card-left h1{color:#e2557d;margin:0}
+.card-left p{color:#555}
+.note{font-style:italic;color:#777}
+
+/* GALLERY */
+.gallery-box{
+    width:300px;height:360px;position:relative;
+    border-radius:20px;overflow:hidden;background:#eee;
+}
+
+
+
+
+#scratch{position:absolute;inset:0;z-index:5}
+
+/* MODAL */
+.modal{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;justify-content:center;align-items:center;
+    z-index:10;
+}
+.modal.active{display:flex}
+.modal img{max-width:90%;max-height:90%;border-radius:12px}
+.close{
+    position:absolute;top:20px;right:30px;
+    color:#fff;font-size:32px;cursor:pointer;
+}
+
+/* MUSIC */
+.music-btn{
+    position:fixed;bottom:20px;right:20px;
+    background:#ff7aa2;color:#fff;
+    border:none;border-radius:50%;
+    width:48px;height:48px;
+    font-size:20px;cursor:pointer;
+}
+
+.hidden img{
+    position:absolute;
+    width:85%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    border-radius:12px;
+    box-shadow:0 10px 20px rgba(0,0,0,.25);
+    opacity:.65;
+    pointer-events:none;
+
+    /* Lắc không đồng bộ */
+    animation-name: wobble-soft;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+
+
+/* ảnh trên cùng */
+.hidden img.top{
+    opacity:1;
+    pointer-events:auto;
+    animation: wobble 3s ease-in-out infinite;
+}
+
+
+/* hiệu ứng lắc */
+@keyframes wobble{
+    0%   { transform:translate(-50%,-50%) rotate(-2deg); }
+    50%  { transform:translate(-50%,-50%) rotate(2deg); }
+    100% { transform:translate(-50%,-50%) rotate(-2deg); }
+}
+@keyframes wobble-soft{
+    0%   { transform:translate(-50%,-50%) rotate(-1deg); }
+    50%  { transform:translate(-50%,-50%) rotate(1deg); }
+    100% { transform:translate(-50%,-50%) rotate(-1deg); }
+}
+@keyframes wobble-strong{
+    0%   { transform:translate(-50%,-50%) rotate(-2.5deg); }
+    50%  { transform:translate(-50%,-50%) rotate(2.5deg); }
+    100% { transform:translate(-50%,-50%) rotate(-2.5deg); }
+}
+
+
+.hidden{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .8s ease;
+}
+
+.hidden.show{
+    opacity:1;
+    pointer-events:auto;
+}
+
+/* ẢNH Ổ KHÓA NỀN */
+/* Ổ khóa nền chính */
+.lock-bg-global{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+
+    width:520px;
+    max-width:140vw;
+
+    opacity:0.95;
+    pointer-events:none;
+    z-index:1;
+}
+
+/* lock screen nổi trên ổ khóa */
+#lock-screen{
+    position:relative;
+    z-index:2;
+}
+
+/* bỏ nền của lock-box */
+.lock-box{
+    background:transparent;
+    box-shadow:none;
+    padding:0;
+}
+
+/* ===== MOBILE FIX FOR LETTER ===== */
+@media (max-width: 768px) {
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .letter-container {
+    width: 92vw;
+    max-width: none;
+    height: auto;
+    max-height: 85vh;
+    padding: 18px 16px 22px;
+    border-radius: 18px;
+  }
+
+  .letter-content {
+    font-size: 16px;
+    line-height: 1.7;
+    max-height: 65vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .letter-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .letter-content::-webkit-scrollbar-thumb {
+    background: rgba(255,150,180,.4);
+    border-radius: 6px;
+  }
+
+  .letter-title {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .close-letter {
+    position: sticky;
+    top: 0;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(6px);
+    padding: 8px 0;
+    z-index: 10;
+  }
+}
+@media (max-width:768px){
+  .image-modal img{
+    max-width: 92vw;
+    max-height: 70vh;
+  }
+
+  .image-modal .close{
+    font-size: 32px;
+    top: 10px;
+    right: 14px;
+  }
+}
+
+/* ===== BLUR BACKGROUND WHEN MODAL OPEN ===== */
+body.modal-open .card,
+body.modal-open .gallery-box{
+    filter: blur(6px);
+    opacity: .6;
+    pointer-events:none;
+}
+
+body:not(.modal-open) .card,
+body:not(.modal-open) .gallery-box{
+    filter:none;
+    opacity:1;
+    pointer-events:auto;
+}
+
+.gallery-box {
+    filter: none;
+    opacity: 1;
+}
+@media (max-width: 768px){
+  .card-inner{
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .gallery-box{
+    width: 260px;
+    height: 300px;
+    margin: 0 auto;
+  }
+
+  .card{
+    padding: 18px;
+  }
+
+  .card-left h1{
+    text-align: center;
+  }
+
+  .card-left p,
+  .note{
+    text-align: center;
+  }
+}
+
+@media (max-width:768px){
+  .col button{
+    width: 44px;
+    height: 34px;
+    font-size: 16px;
+  }
+
+  .col input{
+    width: 46px;
+    height: 46px;
+    font-size: 24px;
+  }
+}
+#scratch{
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+
+.modal img{
+    filter:none !important;
+    opacity:1 !important;
+}
+@media (max-width: 768px){
+  .card{
+    max-height: 92vh;
+    overflow: hidden;
+    padding: 16px;
+  }
+
+  .card-inner{
+    flex-direction: column;
+    height: 100%;
+  }
+}
+@media (max-width: 768px){
+  .card-left{
+    overflow-y: auto;
+    max-height: 45vh;
+    padding-right: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 768px){
+  .gallery-box{
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 280px;
+    height: 300px;
+    margin: 0 auto;
+  }
+}
+@media (max-width: 768px){
+  .card{
+    max-height: 90vh;
+    overflow: hidden;
+  }
+
+  .card-inner{
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width:768px){
+  .modal img{
+    max-height: 80vh;
+    max-width: 92vw;
+  }
+}
+@media (orientation: portrait){
+  .card{
+    width: 95vw;
+    max-height: 92vh;
+  }
+}
+
+@media (orientation: landscape){
+  .card{
+    width: 90vw;
+    max-height: 85vh;
+  }
+
+  .card-inner{
+    flex-direction: row;
+  }
+}
+
+
+</style>
+</head>
+
+<body>
+<img src="heart.png" class="lock-bg-global" id="lockBg">
+<script>
+for(let i=0;i<18;i++){
+    let h=document.createElement("div");
+    h.className="heart";
+    h.style.left=Math.random()*100+"%";
+    h.style.animationDelay=Math.random()*10+"s";
+    document.body.appendChild(h);
+}
+</script>
+
+<!-- LOCK -->
+<div id="lock-screen" class="screen active">
+    
+    <div class="lock-box">
+       
+        <h2> Mật mã 💗</h2>
+        <div class="lock">
+            <div class="col">
+                <button class="up" data-i="0">▲</button>
+                <input class="digit" value="0" disabled>
+                <button class="down" data-i="0">▼</button>
+            </div>
+            <div class="col">
+                <button class="up" data-i="1">▲</button>
+                <input class="digit" value="0" disabled>
+                <button class="down" data-i="1">▼</button>
+            </div>
+            <div class="col">
+                <button class="up" data-i="2">▲</button>
+                <input class="digit" value="0" disabled>
+                <button class="down" data-i="2">▼</button>
+            </div>
+            <div class="col">
+                <button class="up" data-i="3">▲</button>
+                <input class="digit" value="0" disabled>
+                <button class="down" data-i="3">▼</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CARD -->
+<div id="card-screen" class="screen">
+    <div class="card">
+        <div class="card-inner">
+            <div class="card-left">
+                <h1 id="title">Gửi em 💗</h1>
+
+                <p id="msg"data-text="
+                Em à,<br><br>
+
+                Anh không giỏi nói những lời hoa mỹ, nhưng có em là anh vui rồi.<br><br>
+
+                Có thể anh không hoàn hảo, đôi khi nghĩ nhiều một chút. Nhưng em vẫn lắng nghe anh.<br><br>
+
+                Nếu sau này em có mệt mỏi ,buồn ,chán anh hay có gì đó mà anh làm sai kiến em nghĩ nhiều.<br><br>
+                
+                thì hãy nói với anh nói với anh,anh vẫn luôn ở dây lắng nghe em. <br><br>    
+
+                Anh không hứa sẽ sửa được luôn , nhưng anh hứa sẽ sửa .<br><br>
+
+                Cảm ơn em vì đã ở đây,bên cạnh anh.<br><br>
+
+                <b>Thương em.</b>
+                ">
+                
+                </p>
+
+                <p class="note">Cào để xem những điều bí mật nhé.</p>
+            </div>
+
+            <div class="gallery-box">
+                <div class="hidden" id="gallery">
+                    <img src="a1.jpg">
+                    <img src="a2.jpg">
+                    <img src="a3.jpg">
+                    <img src="a4.jpg">
+                    <img src="a5.jpg">
+                </div>
+                <canvas id="scratch" width="300" height="360"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+    <span class="close">✖</span>
+    <img id="modal-img">
+</div>
+
+<!-- MUSIC -->
+<audio id="music" autoplay muted loop src="music.mp3"></audio>
+
+<button class="music-btn" id="musicBtn">🎵</button>
+
+<script>
+let isRotating = false;
+
+/* ===== READ ?c= ===== */
+const p = new URLSearchParams(location.search);
+if(p.has("c")){
+    try{
+        const data = JSON.parse(atob(p.get("c")));
+        title.innerText = data.title || title.innerText;
+
+        if(data.msg){
+            msg.dataset.text = data.msg;   // 👈 đưa vào data-text
+            msg.innerHTML = "";             // 👈 xóa chữ hiển thị
+        }
+    }catch(e){}
+}
+
+/* ===== LOCK ===== */
+const correct="1402";
+let cur=[0,0,0,0];
+document.querySelectorAll(".lock button").forEach(b=>{
+    b.onclick=()=>{
+        const i=b.dataset.i;
+        cur[i]+=b.classList.contains("up")?1:-1;
+        if(cur[i]>9)cur[i]=0;
+        if(cur[i]<0)cur[i]=9;
+        document.querySelectorAll(".digit")[i].value=cur[i];
+        if(cur.join("") === correct){
+    document.getElementById("lock-screen").classList.remove("active");
+    document.getElementById("card-screen").classList.add("active");
+    setTimeout(()=>{
+    const msgEl = document.getElementById("msg");
+    if(msgEl) typeWriter(msgEl, 28);
+}, 400);
+        
+    // ẩn ổ khóa
+    const lockBg = document.getElementById("lockBg");
+    if(lockBg){
+        lockBg.style.transition = "opacity .8s ease, transform .8s ease";
+        lockBg.style.opacity = "0";
+        lockBg.style.transform = "translate(-50%,-50%) scale(0.85)";
+        setTimeout(()=>lockBg.remove(),800);
+    }
+}
+
+    }
+});
+
+/* ===== SCRATCH % ===== */
+const canvas=document.getElementById("scratch");
+const ctx=canvas.getContext("2d");
+ctx.fillStyle="#aaa";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.globalCompositeOperation="destination-out";
+document.body.style.overflow = "hidden";
+document.body.style.overflow = "";
+
+let draw=false,revealed=false;
+function pos(e){
+    const r = canvas.getBoundingClientRect();
+    return {
+        x: e.clientX - r.left,
+        y: e.clientY - r.top
+    };
+}
+
+function scratch(e){
+    if(!draw)return;
+    e.preventDefault();
+    const p=pos(e);
+    ctx.beginPath();
+    const radius = window.innerWidth < 768 ? 30 : 22;
+    ctx.arc(p.x, p.y, radius, 0, Math.PI*2);
+    ctx.fill();
+    checkReveal();
+}
+function checkReveal(){
+    if(revealed) return;
+    const img = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    let clear = 0;
+
+    for(let i=3;i<img.length;i+=4){
+        if(img[i] === 0) clear++;
+    }
+
+    if(clear / (img.length / 4) > 0.35){
+        revealed = true;
+        gallery.classList.add("show");
+        canvas.style.display = "none";
+        
+
+        setupStack();
+        startStackSlideshow();
+        applyWobblePhase();
+
+
+
+        // ẩn canvas để thấy ảnh
+    }
+}
+
+canvas.addEventListener("pointerdown", e=>{
+    draw = true;
+    scratch(e);
+});
+
+canvas.addEventListener("pointermove", e=>{
+    if(draw) scratch(e);
+});
+
+canvas.addEventListener("pointerup", ()=> draw=false);
+canvas.addEventListener("pointercancel", ()=> draw=false);
+
+
+/* ===== AUTO IMAGE MOVE ===== */
+
+
+/* ===== MODAL ===== */
+const modal=document.getElementById("modal");
+const modalImg=document.getElementById("modal-img");
+gallery.addEventListener("pointerdown", () => {
+    const activeImg = gallery.querySelector("img.top");
+    if (!activeImg) return;
+
+    modalImg.src = activeImg.src;
+    modal.classList.add("active");
+    document.body.classList.add("modal-open");
+
+});
+
+
+document.querySelector(".close").onclick = closeModal;
+
+
+
+/* ===== MUSIC ===== */
+/*const music=document.getElementById("music");
+const btn=document.getElementById("musicBtn");*/
+/*btn.onclick=()=>{
+    if(music.paused){music.play();btn.textContent="🔊"}
+    else{music.pause();btn.textContent="🎵"}
+};*/
+window.addEventListener("load", () => {
+    const music = document.getElementById("music");
+    const btn = document.getElementById("musicBtn");
+
+    // phát khi load (đang muted nên không bị chặn)
+    music.play().then(()=>{
+        // bật tiếng sau 500ms
+        setTimeout(()=>{
+            music.muted = false;
+            btn.textContent = "🔊";
+        }, 500);
+    }).catch(()=>{
+        console.log("Autoplay bị chặn");
+    });
+    
+});
+
+/* ===== RANDOM IMAGE POSITION ===== */
+
+
+/* ===== IMAGE CHANGE EFFECT ===== */
+
+/* ===== SLIDESHOW IMAGE ===== */
+let slideIndex = 0;
+let slides = [];
+
+function startSlideshow(){
+    slides = document.querySelectorAll("#gallery img");
+
+    slides.forEach(img=>{
+        img.classList.remove("active");
+        img.style.transform = "translate(-50%, -50%)";
+    });
+
+    slides[0].classList.add("active");
+
+    setInterval(()=>{
+        slides[slideIndex].classList.remove("active");
+
+        slideIndex = (slideIndex + 1) % slides.length;
+        const img = slides[slideIndex];
+
+        const r = Math.random()*10 - 5; // xoay nhẹ
+        const s = (Math.random()*0.04 + 0.98).toFixed(2);
+
+        img.style.transform =
+            `translate(-50%, -50%) rotate(${r}deg) scale(${s})`;
+
+        img.classList.add("active");
+    },3000);
+}
+let images = [];
+let topIndex = 0;
+
+function setupStack(){
+    images = Array.from(document.querySelectorAll("#gallery img"));
+
+    images.forEach((img,i)=>{
+        const r = Math.random()*12 - 6;
+        const x = Math.random()*18 - 9;
+        const y = Math.random()*18 - 9;
+
+        img.style.transform =
+          `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) rotate(${r}deg)`;
+
+        img.style.zIndex = i + 1;
+    });
+
+    setTopImage(0);
+}
+
+function setTopImage(index){
+    images.forEach(img=>img.classList.remove("top"));
+
+    const img = images[index];
+    img.classList.add("top");
+    img.style.zIndex = images.length + 10;
+}
+
+function startStackSlideshow(){
+    setInterval(()=>{
+        images[topIndex].classList.remove("top");
+        images[topIndex].style.zIndex = topIndex + 1;
+
+        topIndex = (topIndex + 1) % images.length;
+
+        setTopImage(topIndex);
+    },3000);
+}
+
+function applyWobblePhase(){
+    images.forEach(img=>{
+        const duration = (Math.random()*4 + 5).toFixed(2); // 5–9s
+        const delay = (-Math.random()*duration).toFixed(2); // lệch phase
+
+        img.style.animationDuration = duration + "s";
+        img.style.animationDelay = delay + "s";
+    });
+}
+function closeModal() {
+    modal.classList.remove("active");
+    document.body.classList.remove("modal-open");
+}
+
+const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+if(!isMobile){
+    modal.onclick = e => {
+        if (e.target === modal) closeModal();
+    };
+}
+
+
+
+let startY = 0;
+
+let hasMoved = false;
+let modalLocked = false;
+
+modal.addEventListener("touchstart", e=>{
+    startY = e.touches[0].clientY;
+    hasMoved = false;
+});
+
+modal.addEventListener("touchmove", e=>{
+    if(Math.abs(e.touches[0].clientY - startY) > 15){
+        hasMoved = true;
+    }
+});
+
+modal.addEventListener("touchend", e=>{
+    if(modalLocked) return;
+    if(isRotating) return;
+    if(!modal.classList.contains("active")) return;
+
+    const endY = e.changedTouches[0].clientY;
+    if(endY - startY > 80){
+        closeModal();
+    }
+});
+
+
+
+window.addEventListener("orientationchange", ()=>{
+    modalLocked = true;
+
+    setTimeout(()=>{
+        modalLocked = false;
+    }, 1200); // đủ lâu cho browser ổn định
+});
+
+function typeWriter(el, speed = 30){
+    const text = el.dataset.text.trim();
+    el.innerHTML = "";
+    let i = 0;
+
+    function typing(){
+        if(i < text.length){
+            // giữ nguyên thẻ HTML như <br>, <b>
+            if(text[i] === "<"){
+                const close = text.indexOf(">", i);
+                el.innerHTML += text.slice(i, close + 1);
+                i = close + 1;
+            }else{
+                el.innerHTML += text[i];
+                i++;
+            }
+            setTimeout(typing, speed);
+        }
+    }
+    typing();
+}
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
